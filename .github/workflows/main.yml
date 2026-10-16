@@ -21,23 +21,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. تجهيز Java
+      # 2. تجهيز Java 17 (مطلوبة لأحدث إصدارات أندرويد)
       - name: Set up Java 17
         uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: '17'
 
-      # 3. إعداد Android SDK وحزمها مباشرة
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: |
-            platform-tools
-            platforms;android-35
-            build-tools;35.0.0
-
-      # 4. فك ضغط المشروع
+      # 3. فك ضغط المشروع
       - name: Extract ZIP project
         shell: bash
         run: |
@@ -55,7 +46,7 @@ jobs:
 
           echo "ZIP extracted successfully!"
 
-      # 5. التأكد من وجود ملفات المشروع
+      # 4. التأكد من وجود ملفات المشروع
       - name: Check project files
         run: |
           test -f settings.gradle
@@ -65,14 +56,14 @@ jobs:
 
           echo "Project files found successfully!"
 
-      # 6. تجهيز Gradle وبناء تطبيق APK
-      - name: Set up Gradle and Build APK
+      # 5. بناء تطبيق APK وتنزيل الأدوات المطلوبة تلقائياً عبر Gradle
+      - name: Build Android APK with Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
           arguments: assembleDebug
 
-      # 7. رفع APK كملف قابل للتنزيل
+      # 6. رفع APK كملف قابل للتنزيل
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
