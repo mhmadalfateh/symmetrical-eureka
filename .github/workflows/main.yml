@@ -44,10 +44,10 @@ jobs:
         run: |
           yes | sdkmanager --licenses || true
 
-      # 6. تثبيت حزم Android المطلوبة
+      # 6. تثبيت حزم Android المطلوبة (تم التعديل هنا)
       - name: Install Android SDK packages
         run: |
-          sdkmanager \
+          sdkmanager --install \
             "platform-tools" \
             "platforms;android-35" \
             "build-tools;35.0.0"
