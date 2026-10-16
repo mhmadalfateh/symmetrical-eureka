@@ -28,11 +28,10 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # 3. فك ضغط ملف الـ ZIP بالاسم الصحيح الموجود في المستودع
+      # 3. فك ضغط ملف الـ ZIP للمشروع
       - name: Extract ZIP project
         shell: bash
         run: |
-          # العثور على ملف الـ ZIP الذي يبدأ بـ Material تلقائياً لتجنب مشاكل الأسماء
           ZIP_FILE=$(ls Material*.zip | head -n 1)
           
           if [ -z "$ZIP_FILE" ]; then
@@ -64,14 +63,23 @@ jobs:
 
           echo "Project files found successfully!"
 
-      # 5. بناء تطبيق APK عبر Gradle وتنزيل الأدوات تلقائياً
-      - name: Build Android APK with Gradle
+      # 5. تجهيز Gradle فقط (بدون arguments ملغاة)
+      - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v4
         with:
           gradle-version: '8.9'
-          arguments: assembleDebug
 
-      # 6. رفع APK كملف قابل للتنزيل
+      # 6. بناء تطبيق APK باستخدام ملف التشغيل الخاص بالمشروع gradlew (أو أمر gradle)
+      - name: Build Android APK
+        run: |
+          if [ -f "./gradlew" ]; then
+            chmod +x ./gradlew
+            ./gradlew assembleDebug
+          else
+            gradle --no-daemon assembleDebug
+          fi
+
+      # 7. رفع APK كملف قابل للتنزيل
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
