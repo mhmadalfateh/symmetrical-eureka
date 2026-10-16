@@ -28,31 +28,16 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # 3. تجهيز Gradle
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
-
-      # 4. إعداد Android SDK
+      # 3. إعداد Android SDK وحزمها مباشرة
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
+        with:
+          packages: |
+            platform-tools
+            platforms;android-35
+            build-tools;35.0.0
 
-      # 5. قبول تراخيص Android
-      - name: Accept Android licenses
-        shell: bash
-        run: |
-          yes | sdkmanager --licenses || true
-
-      # 6. تثبيت حزم Android المطلوبة (تم التعديل هنا)
-      - name: Install Android SDK packages
-        run: |
-          sdkmanager --install \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
-
-      # 7. فك ضغط المشروع
+      # 4. فك ضغط المشروع
       - name: Extract ZIP project
         shell: bash
         run: |
@@ -70,7 +55,7 @@ jobs:
 
           echo "ZIP extracted successfully!"
 
-      # 8. التأكد من وجود ملفات المشروع
+      # 5. التأكد من وجود ملفات المشروع
       - name: Check project files
         run: |
           test -f settings.gradle
@@ -80,12 +65,14 @@ jobs:
 
           echo "Project files found successfully!"
 
-      # 9. بناء تطبيق APK
-      - name: Build Android APK
-        run: |
-          gradle --no-daemon assembleDebug
+      # 6. تجهيز Gradle وبناء تطبيق APK
+      - name: Set up Gradle and Build APK
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.9'
+          arguments: assembleDebug
 
-      # 10. رفع APK كملف قابل للتنزيل
+      # 7. رفع APK كملف قابل للتنزيل
       - name: Upload APK Artifact
         uses: actions/upload-artifact@v4
         with:
