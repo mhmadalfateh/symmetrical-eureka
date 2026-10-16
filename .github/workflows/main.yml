@@ -28,35 +28,33 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      # 3. أمر فك ضغط ملف الـ ZIP الخاص بالمشروع
+      # 3. فك ضغط ملف الـ ZIP بالاسم الصحيح الموجود في المستودع
       - name: Extract ZIP project
         shell: bash
         run: |
-          # التأكد من وجود الملف في المستودع
-          if [ ! -f "MaterialManager-Android.zip" ]; then
-            echo "ERROR: MaterialManager-Android.zip not found in the root directory!"
+          # العثور على ملف الـ ZIP الذي يبدأ بـ Material تلقائياً لتجنب مشاكل الأسماء
+          ZIP_FILE=$(ls Material*.zip | head -n 1)
+          
+          if [ -z "$ZIP_FILE" ]; then
+            echo "ERROR: No ZIP file found!"
             exit 1
           fi
 
-          echo "Found MaterialManager-Android.zip, extracting..."
+          echo "Found ZIP file: $ZIP_FILE, extracting..."
           
-          # إنشاء مجلد مؤقت وفك الضغط بداخله
           mkdir -p /tmp/material-project
-          unzip -o MaterialManager-Android.zip -d /tmp/material-project
+          unzip -o "$ZIP_FILE" -d /tmp/material-project
 
-          # نقل الملفات المستخرجة إلى المجلد الرئيسي للجذر (Workspace)
-          # إذا كان الـ ZIP يحتوي على مجلد رئيسي بداخله، ننقل ما بداخله مباشرة
           if [ -d "/tmp/material-project/app" ]; then
             cp -a /tmp/material-project/. .
           else
-            # إذا كان الـ ZIP يضم مجلداً يحيط بكافة الملفات
             SUBFOLDER=$(ls /tmp/material-project | head -n 1)
             cp -a /tmp/material-project/$SUBFOLDER/. .
           fi
 
           echo "ZIP extracted and files moved successfully!"
 
-      # 4. التأكد من وجود ملفات المشروع بعد الفك
+      # 4. التأكد من وجود ملفات المشروع الأساسية
       - name: Check project files
         run: |
           test -f settings.gradle
